@@ -31,7 +31,19 @@ function chatReducer(state, action) {
             return { ...state, conversations: action.payload };
 
         case ACTIONS.SET_ACTIVE_CONVERSATION:
-            return { ...state, activeConversation: action.payload, messages: [] };
+            // Mark conversation as read
+            const updatedConversations = state.conversations.map(c => {
+                if (c.id === action.payload) {
+                    return { ...c, unreadCount: 0 };
+                }
+                return c;
+            });
+            return {
+                ...state,
+                activeConversation: action.payload,
+                conversations: updatedConversations,
+                messages: []
+            };
 
         case ACTIONS.SET_MESSAGES:
             return { ...state, messages: action.payload };
@@ -39,17 +51,49 @@ function chatReducer(state, action) {
         case ACTIONS.ADD_MESSAGE:
             const { message, conversationId } = action.payload;
 
-            // Only add message if it belongs to the active conversation
-            // If conversationId is provided, check it against activeConversation
-            // If activeConversation is null, don't add anything
-            if (conversationId && conversationId !== state.activeConversation) {
-                return state;
+            // 1. Update messages list if it's the active conversation
+            let newMessages = state.messages;
+            if (conversationId && conversationId === state.activeConversation) {
+                // Check if message already exists
+                const exists = state.messages.some(m => m.id === message.id);
+                if (!exists) {
+                    newMessages = [...state.messages, message];
+                }
             }
 
-            // Check if message already exists
-            const exists = state.messages.some(m => m.id === message.id);
-            if (exists) return state;
-            return { ...state, messages: [...state.messages, message] };
+            // 2. Update conversations list (update last message + unread count + reorder)
+            let conversations = [...state.conversations];
+            const convIndex = conversations.findIndex(c => c.id === conversationId);
+
+            if (convIndex >= 0) {
+                const conv = conversations[convIndex];
+                const isUnread = conversationId !== state.activeConversation;
+
+                const updatedConv = {
+                    ...conv,
+                    lastMessage: { text: message.text },
+                    unreadCount: isUnread ? (conv.unreadCount || 0) + 1 : 0
+                };
+
+                // Move to top
+                conversations.splice(convIndex, 1);
+                conversations.unshift(updatedConv);
+            } else {
+                // New conversation found via socket? Add to top
+                // (Optional: fetch contact details properly, for now basic info)
+                conversations.unshift({
+                    id: conversationId,
+                    name: conversationId.split('@')[0], // Fallback name
+                    lastMessage: { text: message.text },
+                    unreadCount: conversationId !== state.activeConversation ? 1 : 0
+                });
+            }
+
+            return {
+                ...state,
+                messages: newMessages,
+                conversations: conversations
+            };
 
         case ACTIONS.UPDATE_EXTRACTED_DATA:
             const currentData = state.extractedData[action.payload.conversationId] || {};

@@ -8,7 +8,7 @@ function MessageList() {
     // Auto-scroll to bottom on new messages
     useEffect(() => {
         if (listRef.current) {
-            listRef.current.scrollTop = listRef.current.scrollHeight;
+            listRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [state.messages]);
 
@@ -19,7 +19,7 @@ function MessageList() {
     };
 
     return (
-        <div className="message-list" ref={listRef}>
+        <div className="message-list">
             {state.messages.map((msg, index) => (
                 <div
                     key={msg.id || index}
@@ -45,6 +45,7 @@ function MessageList() {
                     <p>No hay mensajes en esta conversación</p>
                 </div>
             )}
+            <div ref={listRef} />
         </div>
     );
 }
