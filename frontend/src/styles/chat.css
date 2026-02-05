@@ -397,6 +397,22 @@ body {
   color: var(--text-primary);
 }
 
+.field-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 14px;
+  padding: 4px 0;
+  font-family: inherit;
+}
+
+.field-input:focus {
+  outline: none;
+  border-bottom-color: var(--primary-color);
+}
+
 /* Opportunity Section */
 .opportunity-section {
   margin-top: auto;

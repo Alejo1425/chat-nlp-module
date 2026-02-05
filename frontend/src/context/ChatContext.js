@@ -6,10 +6,64 @@ const initialState = {
     conversations: [],
     activeConversation: null,
     messages: [],
-    extractedData: {},
+    extractedData: JSON.parse(localStorage.getItem('chat_extracted_data')) || {}, // Load from local storage
     connectionStatus: 'disconnected',
     loading: false,
     error: null
+};
+
+// ... existing code ...
+
+        case ACTIONS.SET_MESSAGES:
+// Consolidate extracted data from all messages
+let consolidatedData = state.extractedData[state.activeConversation] || {};
+
+action.payload.forEach(msg => {
+    if (msg.extractedData) {
+        // Update only fields that are NOT already present (don't overwrite existing data)
+        // unless the existing value is null/undefined
+        Object.keys(msg.extractedData).forEach(key => {
+            const newValue = msg.extractedData[key];
+            // Only set if we don't have a value yet
+            if (newValue && !consolidatedData[key]) {
+                consolidatedData = {
+                    ...consolidatedData,
+                    [key]: newValue
+                };
+            }
+        });
+    }
+});
+
+const newExtractedData = {
+    ...state.extractedData,
+    [state.activeConversation]: consolidatedData
+};
+
+// Persist to local storage
+localStorage.setItem('chat_extracted_data', JSON.stringify(newExtractedData));
+
+return {
+    ...state,
+    messages: action.payload,
+    extractedData: newExtractedData
+};
+
+        case ACTIONS.MANUAL_UPDATE_EXTRACTED_DATA:
+const updatedManualData = {
+    ...state.extractedData,
+    [action.payload.conversationId]: {
+        ...state.extractedData[action.payload.conversationId],
+        ...action.payload.data
+    }
+};
+
+// Persist to local storage
+localStorage.setItem('chat_extracted_data', JSON.stringify(updatedManualData));
+
+return {
+    ...state,
+    extractedData: updatedManualData
 };
 
 // Action types
