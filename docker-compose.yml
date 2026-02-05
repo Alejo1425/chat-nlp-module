@@ -51,12 +51,13 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "3000:80"
     networks:
       - chat-network
 
 volumes:
   postgres_data:
+
 
 networks:
   chat-network:
