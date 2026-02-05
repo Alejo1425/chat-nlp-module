@@ -30,7 +30,8 @@ router.post('/opportunity', async (req, res) => {
         });
 
         logger.info(`Opportunity created for contact ${contactId}`);
-        res.json({ success: true, opportunityId: opportunity.id });
+        // Return full opportunity object including 'raw' data from CRM
+        res.json({ success: true, opportunityId: opportunity.id, ...opportunity });
     } catch (error) {
         // Detailed logging for debugging
         console.error('CRM OPPORTUNITY ERROR:', JSON.stringify(error.response?.data || error.message, null, 2));
