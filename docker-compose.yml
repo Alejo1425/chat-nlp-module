@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: chat-nlp-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-chatuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chatpass}
+      POSTGRES_DB: ${DB_NAME:-chatnlp}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - chat-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chat-nlp-backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-chatuser}
+      DB_PASSWORD: ${DB_PASSWORD:-chatpass}
+      DB_NAME: ${DB_NAME:-chatnlp}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE}
+      CRM_API_URL: ${CRM_API_URL}
+      CRM_API_KEY: ${CRM_API_KEY}
+    ports:
+      - "3001:3001"
+    networks:
+      - chat-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chat-nlp-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - chat-network
+
+volumes:
+  postgres_data:
+
+networks:
+  chat-network:
+    driver: bridge
