@@ -13,32 +13,51 @@ const api = axios.create({
 /**
  * Create a new opportunity in CRM
  */
+/**
+ * Create a new opportunity in CRM
+ */
 async function createOpportunity(data) {
     try {
+        // Generate a random numeric ID for IDOportunidadAuteco (as recommended > 0)
+        const randomId = Math.floor(Math.random() * 1000000) + 1;
+
         const opportunity = {
-            title: `Oportunidad - ${data.name || data.phone || 'Sin nombre'}`,
-            contact: {
-                name: data.name,
-                phone: data.phone,
-                cedula: data.cedula,
-                email: data.email,
-                profession: data.profession
-            },
-            product: {
-                model: data.motoModel,
-                type: 'motorcycle'
-            },
-            source: 'whatsapp-chat',
-            notes: data.notes || '',
-            status: 'new',
-            createdAt: new Date().toISOString()
+            ID: -1, // Always -1 for creation
+            NombreContacto: data.name || data.phone || 'Cliente Chat',
+            TipoDocumento: 'CC', // Default
+            Documento: data.cedula || '',
+            Email: data.email || 'sin_email@example.com', // CRM likely requires valid email format
+            Telefono2: data.phone || '',
+            CodigoDANE: config.crm.defaults.codigoDane,
+            IDOportunidadAuteco: randomId.toString(),
+            Origen: config.crm.defaults.origen,
+            Campanna: config.crm.defaults.campana,
+            Establecimiento: config.crm.defaults.establecimiento,
+            Productos: [{
+                Producto: data.motoModel || 'Interés General',
+                Marca: 'TVS' // Defaulting to TVS or generic if unknown, could be improved with extraction
+            }],
+            Observaciones: `Generado desde Chat NLP. \nNotas: ${data.notes || ''} \nProfesión: ${data.profession || 'No especificada'}`,
+            HabeasData: true,
+            Sistema: 'mobility',
+            NivelInteres: config.crm.defaults.nivelInteres,
+            Usuario: config.crm.defaults.usuario
         };
 
-        const response = await api.post('/opportunities', opportunity);
-        logger.info(`Opportunity created: ${response.data.id}`);
-        return response.data;
+        logger.info('Sending opportunity to CRM:', opportunity);
+
+        const response = await api.post('/oportunidades/Crear', opportunity);
+
+        if (response.data && response.data.Exitoso) {
+            logger.info(`Opportunity created successfully. ID: ${response.data.IDRegistro}`);
+            return { success: true, id: response.data.IDRegistro, raw: response.data };
+        } else {
+            logger.error('CRM returned unsuccessful response:', response.data);
+            throw new Error(response.data?.Error?.Mensaje || 'CRM rejected the request');
+        }
+
     } catch (error) {
-        logger.error('CRM createOpportunity error:', error.response?.data || error.message);
+        logger.error('CRM createOpportunity error details:', error.response?.data || error.message);
         throw error;
     }
 }

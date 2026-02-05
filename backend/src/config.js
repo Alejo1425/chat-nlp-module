@@ -21,7 +21,15 @@ module.exports = {
 
     // CRM API
     crm: {
-        url: process.env.CRM_API_URL || 'http://localhost:8081',
-        apiKey: process.env.CRM_API_KEY || ''
+        url: process.env.CRM_API_URL || 'https://apiimpulsa.impulsacrm.com/api/v2',
+        apiKey: process.env.CRM_API_KEY || 'yXY9j+MWU2XjERV/0X8NjC1bUgAQoVtNLxYvWxXi4odeoCMkjmi2ZazCshkP6T+s7zQJq41Pj9WPOCZ0kTTEOchaD91P6fcmPG3ok35uSzfznCSclhoNqeiQl9H9NSb+IcfjQ38RehgwBhcbYnE1sdhxHIROYq26i9/y6kVSjBA=',
+        defaults: {
+            establecimiento: process.env.CRM_ESTABLECIMIENTO || '550026948',
+            origen: process.env.CRM_ORIGEN || 'SOCIO COMERCIAL',
+            campana: process.env.CRM_CAMPANA || 'REDES COLOMBIANO',
+            codigoDane: process.env.CRM_CODIGO_DANE || '05001',
+            usuario: process.env.CRM_USUARIO || 'CHATBOT_NLP',
+            nivelInteres: 'AA'
+        }
     }
 };
