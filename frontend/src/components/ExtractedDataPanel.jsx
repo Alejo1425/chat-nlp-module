@@ -79,7 +79,24 @@ function ExtractedDataPanel() {
                                 #{opportunity.opportunityId || opportunity.id || opportunity.raw?.IDRegistro || 'N/A'}
                             </div>
                         </div>
-                        {/* Add more details if returned by backend */}
+                        {/* Debug Info Section */}
+                        <div style={{ marginTop: '16px', borderTop: '1px solid #333', paddingTop: '8px' }}>
+                            <details style={{ cursor: 'pointer' }}>
+                                <summary style={{ fontSize: '12px', color: '#666' }}>Ver Detalles Técnicos (Debug)</summary>
+                                <pre style={{
+                                    textAlign: 'left',
+                                    fontSize: '10px',
+                                    background: '#111',
+                                    padding: '8px',
+                                    borderRadius: '4px',
+                                    overflowX: 'auto',
+                                    marginTop: '8px',
+                                    color: '#0f0'
+                                }}>
+                                    {JSON.stringify(opportunity, null, 2)}
+                                </pre>
+                            </details>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -52,16 +52,28 @@ async function createOpportunity(data) {
             const opportunityId = response.data.IDRegistro;
             logger.info(`Opportunity created successfully. ID: ${opportunityId}`);
 
+            let followUpResult = null;
+            let followUpErrorMsg = null;
+
             // Automatically add follow-up to set status to "In Process"
             try {
-                await addFollowUp(opportunityId, data.notes);
+                followUpResult = await addFollowUp(opportunityId, data.notes);
                 logger.info(`Opportunity ${opportunityId} status updated to PR (En Proceso)`);
             } catch (followUpError) {
+                followUpErrorMsg = followUpError.message;
                 logger.error(`Failed to update status for opportunity ${opportunityId}:`, followUpError.message);
-                // We don't fail the whole request, just log it, as the opportunity IS created.
             }
 
-            return { success: true, id: opportunityId, raw: response.data };
+            return {
+                success: true,
+                id: opportunityId,
+                raw: response.data,
+                followUp: {
+                    success: !!followUpResult,
+                    result: followUpResult,
+                    error: followUpErrorMsg
+                }
+            };
         } else {
             logger.error('CRM returned unsuccessful response:', response.data);
             throw new Error(response.data?.Error?.Mensaje || 'CRM rejected the request');
