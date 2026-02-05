@@ -23,8 +23,10 @@ function ExtractedDataPanel() {
             const serverError = error.response?.data;
             const errorMessage = serverError?.details || serverError?.error || error.message;
             const crmMessage = serverError?.crmError ? JSON.stringify(serverError.crmError, null, 2) : '';
+            const debugUrl = serverError?.debug?.config ?
+                `\nURL: ${serverError.debug.config.baseURL}${serverError.debug.config.url}` : '';
 
-            alert(`Error al crear la oportunidad:\n${errorMessage}\n${crmMessage}`);
+            alert(`Error al crear la oportunidad:\n${errorMessage}\n${crmMessage}${debugUrl}`);
         } finally {
             setCreating(false);
         }

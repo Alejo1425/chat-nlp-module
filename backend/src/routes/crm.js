@@ -38,7 +38,8 @@ router.post('/opportunity', async (req, res) => {
         res.status(500).json({
             error: 'Failed to create opportunity',
             details: error.message,
-            crmError: error.response?.data || 'No CRM response data'
+            crmError: error.response?.data || 'No CRM response data',
+            debug: error.debugInfo
         });
     }
 });
