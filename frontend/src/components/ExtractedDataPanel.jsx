@@ -20,6 +20,11 @@ function ExtractedDataPanel() {
             setTimeout(() => setSuccess(false), 3000);
         } catch (error) {
             console.error('Error creating opportunity:', error);
+            const serverError = error.response?.data;
+            const errorMessage = serverError?.details || serverError?.error || error.message;
+            const crmMessage = serverError?.crmError ? JSON.stringify(serverError.crmError, null, 2) : '';
+
+            alert(`Error al crear la oportunidad:\n${errorMessage}\n${crmMessage}`);
         } finally {
             setCreating(false);
         }
