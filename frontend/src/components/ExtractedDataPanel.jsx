@@ -76,7 +76,7 @@ function ExtractedDataPanel() {
                         <div style={{ marginBottom: '8px' }}>
                             <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>ID Registro:</span>
                             <div style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
-                                #{opportunity.opportunityId || opportunity.id || opportunity.raw?.IDRegistro || 'N/A'}
+                                #{opportunity.opportunityId || opportunity.id || opportunity.raw?.IdRegistro || opportunity.raw?.IDRegistro || 'N/A'}
                             </div>
                         </div>
                         {/* Debug Info Section */}
