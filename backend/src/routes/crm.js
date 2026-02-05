@@ -23,6 +23,9 @@ router.post('/opportunity', async (req, res) => {
             email: extractedData.email,
             profession: extractedData.profession,
             motoModel: extractedData.motoModel,
+            documentType: extractedData.documentType,
+            brand: extractedData.brand,
+            campaign: extractedData.campaign,
             notes
         });
 
