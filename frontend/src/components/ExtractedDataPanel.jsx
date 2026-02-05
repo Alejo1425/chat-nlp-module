@@ -81,6 +81,8 @@ function ExtractedDataPanel() {
                         </div>
                         {/* Debug Info Section Removed */}
                     </div>
+                    {/* Post-Creation Actions */}
+                    <PostSaleActions opportunityId={opportunity.opportunityId || opportunity.id || opportunity.raw?.IdRegistro || opportunity.raw?.IDRegistro} />
                 </div>
             </div>
         );
