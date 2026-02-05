@@ -108,7 +108,7 @@ async function addFollowUp(opportunityId, notes) {
             IDOportunidad: opportunityId,
             IDItem: 0,
             Observaciones: notes || 'Oportunidad creada desde Chat NLP - Inicio de proceso',
-            UsuarioCreacion: config.crm.defaults.usuario,
+            // UsuarioCreacion: config.crm.defaults.usuario, // Removed to avoid validation error
             CodigoEstado: 'PR', // PR = En Proceso
             FechaProximoContacto: new Date().toISOString()
         };
