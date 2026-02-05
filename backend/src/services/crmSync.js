@@ -40,8 +40,8 @@ async function createOpportunity(data) {
             Observaciones: `Generado desde Chat NLP. \nNotas: ${data.notes || ''} \nProfesión: ${data.profession || 'No especificada'}`,
             HabeasData: true,
             Sistema: 'mobility',
-            NivelInteres: config.crm.defaults.nivelInteres,
-            Usuario: config.crm.defaults.usuario
+            NivelInteres: config.crm.defaults.nivelInteres
+            // Usuario: config.crm.defaults.usuario // Optional field, omitting to avoid validation errors with 'CHATBOT_NLP'
         };
 
         logger.info('Sending opportunity to CRM:', opportunity);

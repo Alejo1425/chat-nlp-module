@@ -33,7 +33,11 @@ router.post('/opportunity', async (req, res) => {
         res.json({ success: true, opportunityId: opportunity.id });
     } catch (error) {
         logger.error('Error creating opportunity:', error);
-        res.status(500).json({ error: 'Failed to create opportunity' });
+        res.status(500).json({
+            error: 'Failed to create opportunity',
+            details: error.message,
+            crmError: error.response?.data || 'No CRM response data'
+        });
     }
 });
 
