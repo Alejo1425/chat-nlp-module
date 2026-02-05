@@ -171,5 +171,6 @@ function getMockInventory(search = '') {
 module.exports = {
     createOpportunity,
     getInventory,
-    getMotorcycleDetails
+    getMotorcycleDetails,
+    addFollowUp
 };
