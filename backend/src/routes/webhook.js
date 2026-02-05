@@ -26,8 +26,11 @@ router.post('/', async (req, res) => {
             }
 
             // Emit to connected clients
+            const remoteJid = message.key?.remoteJid || '';
+            const normalizedId = remoteJid.split('@')[0]; // Strip domain (@s.whatsapp.net)
+
             io.emit('new-message', {
-                conversationId: message.key?.remoteJid,
+                conversationId: normalizedId,
                 message: {
                     id: message.key?.id,
                     from: message.key?.remoteJid,
