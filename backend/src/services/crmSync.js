@@ -48,8 +48,9 @@ async function createOpportunity(data) {
 
         const response = await api.post('/oportunidades/Crear', opportunity);
 
-        if (response.data && response.data.Exitoso) {
-            const opportunityId = response.data.IDRegistro;
+        if (response.data && (response.data.Exitoso || response.data.exitoso)) {
+            // Fix: Handle Case Sensitivity (IdRegistro vs IDRegistro)
+            const opportunityId = response.data.IDRegistro || response.data.IdRegistro || response.data.idRegistro;
             logger.info(`Opportunity created successfully. ID: ${opportunityId}`);
 
             let followUpResult = null;
@@ -57,8 +58,12 @@ async function createOpportunity(data) {
 
             // Automatically add follow-up to set status to "In Process"
             try {
-                followUpResult = await addFollowUp(opportunityId, data.notes);
-                logger.info(`Opportunity ${opportunityId} status updated to PR (En Proceso)`);
+                if (opportunityId) {
+                    followUpResult = await addFollowUp(opportunityId, data.notes);
+                    logger.info(`Opportunity ${opportunityId} status updated to PR (En Proceso)`);
+                } else {
+                    logger.warn('Opportunity created but no ID returned from CRM (checked IDRegistro, IdRegistro)');
+                }
             } catch (followUpError) {
                 followUpErrorMsg = followUpError.message;
                 logger.error(`Failed to update status for opportunity ${opportunityId}:`, followUpError.message);
