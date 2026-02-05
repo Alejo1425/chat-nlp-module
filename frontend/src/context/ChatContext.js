@@ -7,7 +7,10 @@ const initialState = {
     activeConversation: null,
     messages: [],
     extractedData: JSON.parse(localStorage.getItem('chat_extracted_data')) || {}, // Load from local storage
+    opportunities: JSON.parse(localStorage.getItem('chat_opportunities')) || {}, // Persist opportunities
     connectionStatus: 'disconnected',
+
+
     loading: false,
     error: null
 };
@@ -25,6 +28,7 @@ const ACTIONS = {
     UPDATE_EXTRACTED_DATA: 'UPDATE_EXTRACTED_DATA',
     SET_CONNECTION_STATUS: 'SET_CONNECTION_STATUS',
     SET_LOADING: 'SET_LOADING',
+    SET_OPPORTUNITY: 'SET_OPPORTUNITY',
     SET_ERROR: 'SET_ERROR'
 };
 
@@ -178,6 +182,18 @@ function chatReducer(state, action) {
         case ACTIONS.SET_ERROR:
             return { ...state, error: action.payload };
 
+        case ACTIONS.SET_OPPORTUNITY:
+            const updatedOpportunities = {
+                ...state.opportunities,
+                [action.payload.conversationId]: action.payload.opportunity
+            };
+            localStorage.setItem('chat_opportunities', JSON.stringify(updatedOpportunities));
+
+            return {
+                ...state,
+                opportunities: updatedOpportunities
+            };
+
         default:
             return state;
     }
@@ -290,15 +306,30 @@ export function ChatProvider({ children }) {
         if (!data) return;
 
         try {
+            dispatch({ type: ACTIONS.SET_LOADING, payload: true });
             const response = await api.post('/crm/opportunity', {
                 contactId: state.activeConversation,
                 extractedData: data,
                 notes
             });
+
+            if (response.data.success) {
+                dispatch({
+                    type: ACTIONS.SET_OPPORTUNITY,
+                    payload: {
+                        conversationId: state.activeConversation,
+                        opportunity: response.data
+                    }
+                });
+            }
+
             return response.data;
         } catch (error) {
+            console.error('Create opportunity error:', error);
             dispatch({ type: ACTIONS.SET_ERROR, payload: error.message });
             throw error;
+        } finally {
+            dispatch({ type: ACTIONS.SET_LOADING, payload: false });
         }
     }
 
