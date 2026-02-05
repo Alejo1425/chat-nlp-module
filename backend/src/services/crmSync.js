@@ -68,7 +68,22 @@ async function createOpportunity(data) {
         }
 
     } catch (error) {
-        // ... existing catch block ...
+        // Enhance error with request details for debugging 404s
+        const debugInfo = {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+            config: {
+                url: error.config?.url,
+                baseURL: error.config?.baseURL,
+                method: error.config?.method
+            }
+        };
+        logger.error('CRM createOpportunity error details:', JSON.stringify(debugInfo, null, 2));
+
+        // Attach config info to the error object so route handler sees it
+        error.debugInfo = debugInfo;
+        throw error;
     }
 }
 
@@ -93,24 +108,7 @@ async function addFollowUp(opportunityId, notes) {
         throw error;
     }
 }
-// Enhance error with request details for debugging 404s
-const debugInfo = {
-    message: error.message,
-    status: error.response?.status,
-    data: error.response?.data,
-    config: {
-        url: error.config?.url,
-        baseURL: error.config?.baseURL,
-        method: error.config?.method
-    }
-};
-logger.error('CRM createOpportunity error details:', JSON.stringify(debugInfo, null, 2));
 
-// Attach config info to the error object so route handler sees it
-error.debugInfo = debugInfo;
-throw error;
-    }
-}
 
 /**
  * Get motorcycle inventory from CRM
