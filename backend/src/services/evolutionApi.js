@@ -96,7 +96,10 @@ async function getMessages(contactId, limit = 50) {
                     remoteJid: remoteJid
                 }
             },
-            limit
+            limit,
+            order: {
+                messageTimestamp: "DESC"
+            }
         });
 
         // Handle Evolution API response structure: { messages: { records: [] } }
@@ -112,16 +115,30 @@ async function getMessages(contactId, limit = 50) {
         logger.info(`Found ${messages.length} messages for ${remoteJid}`);
 
         // Transform messages to expected format
-        return messages.map(msg => ({
-            id: msg.key?.id || msg.id,
-            from: msg.key?.remoteJid || remoteJid,
-            fromMe: msg.key?.fromMe || false,
-            text: msg.message?.conversation ||
-                msg.message?.extendedTextMessage?.text ||
-                msg.content ||
-                '[Mensaje multimedia]',
-            timestamp: msg.messageTimestamp || msg.timestamp || Date.now()
-        }));
+        return messages.map(msg => {
+            // Fix timestamp: convert seconds to milliseconds if needed
+            let timestamp = msg.messageTimestamp || msg.timestamp || Date.now();
+            // If timestamp is a number and looks like seconds (10 digits), convert to ms
+            if (typeof timestamp === 'number' && timestamp.toString().length <= 10) {
+                timestamp = timestamp * 1000;
+            }
+            // Sometimes timestamp comes as string or object in some versions
+            if (typeof timestamp === 'string') {
+                timestamp = parseInt(timestamp);
+                if (timestamp.toString().length <= 10) timestamp *= 1000;
+            }
+
+            return {
+                id: msg.key?.id || msg.id,
+                from: msg.key?.remoteJid || remoteJid,
+                fromMe: msg.key?.fromMe || false,
+                text: msg.message?.conversation ||
+                    msg.message?.extendedTextMessage?.text ||
+                    msg.content ||
+                    '[Mensaje multimedia]',
+                timestamp: timestamp
+            };
+        }).sort((a, b) => a.timestamp - b.timestamp); // Sort by date ascending for the chat UI
     } catch (error) {
         logger.error('Evolution API getMessages error:', error.response?.data || error.message);
         // Return empty array instead of throwing to avoid breaking the UI
