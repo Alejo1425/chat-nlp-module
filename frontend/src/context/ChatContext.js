@@ -51,10 +51,16 @@ function chatReducer(state, action) {
 
             action.payload.forEach(msg => {
                 if (msg.extractedData) {
-                    consolidatedData = {
-                        ...consolidatedData,
-                        ...msg.extractedData
-                    };
+                    // Update only fields that are present in the new message
+                    Object.keys(msg.extractedData).forEach(key => {
+                        const value = msg.extractedData[key];
+                        if (value) {
+                            consolidatedData = {
+                                ...consolidatedData,
+                                [key]: value
+                            };
+                        }
+                    });
                 }
             });
 
@@ -116,14 +122,22 @@ function chatReducer(state, action) {
 
         case ACTIONS.UPDATE_EXTRACTED_DATA:
             const currentData = state.extractedData[action.payload.conversationId] || {};
+
+            // Safe merge: only update non-null values
+            const newData = { ...currentData };
+            if (action.payload.data) {
+                Object.keys(action.payload.data).forEach(key => {
+                    if (action.payload.data[key]) {
+                        newData[key] = action.payload.data[key];
+                    }
+                });
+            }
+
             return {
                 ...state,
                 extractedData: {
                     ...state.extractedData,
-                    [action.payload.conversationId]: {
-                        ...currentData,
-                        ...action.payload.data
-                    }
+                    [action.payload.conversationId]: newData
                 }
             };
 
