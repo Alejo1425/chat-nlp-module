@@ -75,7 +75,7 @@ function ExtractedDataPanel() {
                     <div style={{ background: 'var(--bg-dark)', padding: '12px', borderRadius: '6px', textAlign: 'left' }}>
                         <div style={{ marginBottom: '8px' }}>
                             <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>ID Registro:</span>
-                            <div style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>#{opportunity.opportunityId}</div>
+                            <div style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>#{opportunity.opportunityId || opportunity.id || 'N/A'}</div>
                         </div>
                         {/* Add more details if returned by backend */}
                     </div>

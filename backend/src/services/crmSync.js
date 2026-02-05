@@ -49,30 +49,66 @@ async function createOpportunity(data) {
         const response = await api.post('/oportunidades/Crear', opportunity);
 
         if (response.data && response.data.Exitoso) {
-            logger.info(`Opportunity created successfully. ID: ${response.data.IDRegistro}`);
-            return { success: true, id: response.data.IDRegistro, raw: response.data };
+            const opportunityId = response.data.IDRegistro;
+            logger.info(`Opportunity created successfully. ID: ${opportunityId}`);
+
+            // Automatically add follow-up to set status to "In Process"
+            try {
+                await addFollowUp(opportunityId, data.notes);
+                logger.info(`Opportunity ${opportunityId} status updated to PR (En Proceso)`);
+            } catch (followUpError) {
+                logger.error(`Failed to update status for opportunity ${opportunityId}:`, followUpError.message);
+                // We don't fail the whole request, just log it, as the opportunity IS created.
+            }
+
+            return { success: true, id: opportunityId, raw: response.data };
         } else {
             logger.error('CRM returned unsuccessful response:', response.data);
             throw new Error(response.data?.Error?.Mensaje || 'CRM rejected the request');
         }
 
     } catch (error) {
-        // Enhance error with request details for debugging 404s
-        const debugInfo = {
-            message: error.message,
-            status: error.response?.status,
-            data: error.response?.data,
-            config: {
-                url: error.config?.url,
-                baseURL: error.config?.baseURL,
-                method: error.config?.method
-            }
-        };
-        logger.error('CRM createOpportunity error details:', JSON.stringify(debugInfo, null, 2));
+        // ... existing catch block ...
+    }
+}
 
-        // Attach config info to the error object so route handler sees it
-        error.debugInfo = debugInfo;
+/**
+ * Add follow-up to opportunity (change status)
+ */
+async function addFollowUp(opportunityId, notes) {
+    try {
+        const followUp = {
+            IDOportunidad: opportunityId,
+            IDItem: 0,
+            Observaciones: notes || 'Oportunidad creada desde Chat NLP - Inicio de proceso',
+            UsuarioCreacion: config.crm.defaults.usuario,
+            CodigoEstado: 'PR', // PR = En Proceso
+            FechaProximoContacto: new Date().toISOString()
+        };
+
+        const response = await api.post('/oportunidades/ActualizarSeguimiento', followUp);
+        return response.data;
+    } catch (error) {
+        logger.error('CRM addFollowUp error:', error.response?.data || error.message);
         throw error;
+    }
+}
+// Enhance error with request details for debugging 404s
+const debugInfo = {
+    message: error.message,
+    status: error.response?.status,
+    data: error.response?.data,
+    config: {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method
+    }
+};
+logger.error('CRM createOpportunity error details:', JSON.stringify(debugInfo, null, 2));
+
+// Attach config info to the error object so route handler sees it
+error.debugInfo = debugInfo;
+throw error;
     }
 }
 
