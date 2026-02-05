@@ -46,7 +46,26 @@ function chatReducer(state, action) {
             };
 
         case ACTIONS.SET_MESSAGES:
-            return { ...state, messages: action.payload };
+            // Consolidate extracted data from all messages
+            let consolidatedData = state.extractedData[state.activeConversation] || {};
+
+            action.payload.forEach(msg => {
+                if (msg.extractedData) {
+                    consolidatedData = {
+                        ...consolidatedData,
+                        ...msg.extractedData
+                    };
+                }
+            });
+
+            return {
+                ...state,
+                messages: action.payload,
+                extractedData: {
+                    ...state.extractedData,
+                    [state.activeConversation]: consolidatedData
+                }
+            };
 
         case ACTIONS.ADD_MESSAGE:
             const { message, conversationId } = action.payload;

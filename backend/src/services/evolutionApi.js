@@ -83,6 +83,11 @@ async function getContacts() {
 /**
  * Get messages for a contact
  */
+const nlpExtractor = require('./nlpExtractor');
+
+/**
+ * Get messages for a contact
+ */
 async function getMessages(contactId, limit = 50) {
     try {
         // Ensure contactId has the @s.whatsapp.net suffix
@@ -128,15 +133,21 @@ async function getMessages(contactId, limit = 50) {
                 if (timestamp.toString().length <= 10) timestamp *= 1000;
             }
 
+            const textContent = msg.message?.conversation ||
+                msg.message?.extendedTextMessage?.text ||
+                msg.content ||
+                '[Mensaje multimedia]';
+
+            // Extract NLP data on history retrieval
+            const extractedData = nlpExtractor.extractAll(textContent);
+
             return {
                 id: msg.key?.id || msg.id,
                 from: msg.key?.remoteJid || remoteJid,
                 fromMe: msg.key?.fromMe || false,
-                text: msg.message?.conversation ||
-                    msg.message?.extendedTextMessage?.text ||
-                    msg.content ||
-                    '[Mensaje multimedia]',
-                timestamp: timestamp
+                text: textContent,
+                timestamp: timestamp,
+                extractedData: extractedData // Include extracted data
             };
         }).sort((a, b) => a.timestamp - b.timestamp); // Sort by date ascending for the chat UI
     } catch (error) {
