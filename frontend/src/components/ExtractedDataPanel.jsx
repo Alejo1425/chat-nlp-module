@@ -38,10 +38,41 @@ function ExtractedDataPanel() {
         { key: 'motoModel', label: 'Modelo Moto', icon: '🏍️' }
     ];
 
+    const opportunity = state.opportunities[state.activeConversation];
+
     if (!state.activeConversation) {
         return (
             <div className="extracted-data-panel empty">
                 <p>Selecciona una conversación para ver los datos extraídos</p>
+            </div>
+        );
+    }
+
+    // If opportunity exists, show summary
+    if (opportunity) {
+        return (
+            <div className="extracted-data-panel">
+                <div className="opportunity-success-card" style={{
+                    background: 'rgba(37, 211, 102, 0.1)',
+                    border: '1px solid #25d366',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    textAlign: 'center'
+                }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+                    <h3 style={{ color: '#25d366', fontSize: '18px', marginBottom: '8px' }}>¡Oportunidad Creada!</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
+                        La oportunidad ha sido registrada exitosamente en Impulsa CRM.
+                    </p>
+
+                    <div style={{ background: 'var(--bg-dark)', padding: '12px', borderRadius: '6px', textAlign: 'left' }}>
+                        <div style={{ marginBottom: '8px' }}>
+                            <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>ID Registro:</span>
+                            <div style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>#{opportunity.opportunityId}</div>
+                        </div>
+                        {/* Add more details if returned by backend */}
+                    </div>
+                </div>
             </div>
         );
     }
