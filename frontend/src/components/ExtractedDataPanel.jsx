@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useChatContext } from '../context/ChatContext';
 
 function ExtractedDataPanel() {
-    const { state, createOpportunity } = useChatContext();
+    const { state, createOpportunity, updateExtractedData } = useChatContext();
     const [notes, setNotes] = useState('');
     const [creating, setCreating] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -56,9 +56,13 @@ function ExtractedDataPanel() {
                         <span className="field-icon">{icon}</span>
                         <div className="field-content">
                             <label>{label}</label>
-                            <span className="field-value">
-                                {extractedData[key] || '—'}
-                            </span>
+                            <input
+                                type="text"
+                                className="field-input"
+                                value={extractedData[key] || ''}
+                                onChange={(e) => updateExtractedData(state.activeConversation, { [key]: e.target.value })}
+                                placeholder="—"
+                            />
                         </div>
                     </div>
                 ))}

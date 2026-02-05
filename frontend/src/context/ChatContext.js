@@ -141,6 +141,18 @@ function chatReducer(state, action) {
                 }
             };
 
+        case ACTIONS.MANUAL_UPDATE_EXTRACTED_DATA:
+            return {
+                ...state,
+                extractedData: {
+                    ...state.extractedData,
+                    [action.payload.conversationId]: {
+                        ...state.extractedData[action.payload.conversationId],
+                        ...action.payload.data
+                    }
+                }
+            };
+
         case ACTIONS.SET_CONNECTION_STATUS:
             return { ...state, connectionStatus: action.payload };
 
@@ -274,13 +286,22 @@ export function ChatProvider({ children }) {
         }
     }
 
+    // Manual update of extracted data
+    function updateExtractedData(conversationId, data) {
+        dispatch({
+            type: ACTIONS.MANUAL_UPDATE_EXTRACTED_DATA,
+            payload: { conversationId, data }
+        });
+    }
+
     const value = {
         state,
         dispatch,
         selectConversation,
         sendMessage,
         createOpportunity,
-        loadConversations
+        loadConversations,
+        updateExtractedData
     };
 
     return (
