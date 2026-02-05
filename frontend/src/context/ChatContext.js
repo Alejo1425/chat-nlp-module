@@ -333,6 +333,25 @@ export function ChatProvider({ children }) {
         }
     }
 
+    // Update opportunity status (Lost, Quote, Notes)
+    async function updateOpportunityStatus(opportunityId, statusType, notes) {
+        try {
+            dispatch({ type: ACTIONS.SET_LOADING, payload: true });
+            const response = await api.post('/crm/status', {
+                opportunityId,
+                statusType,
+                notes
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Update status error:', error);
+            dispatch({ type: ACTIONS.SET_ERROR, payload: error.message });
+            throw error;
+        } finally {
+            dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+        }
+    }
+
     // Manual update of extracted data
     function updateExtractedData(conversationId, data) {
         dispatch({
@@ -347,6 +366,7 @@ export function ChatProvider({ children }) {
         selectConversation,
         sendMessage,
         createOpportunity,
+        updateOpportunityStatus,
         loadConversations,
         updateExtractedData
     };

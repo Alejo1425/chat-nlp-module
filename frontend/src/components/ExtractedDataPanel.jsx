@@ -227,4 +227,90 @@ function ExtractedDataPanel() {
     );
 }
 
+// Subcomponent for Post-Sale Actions
+function PostSaleActions({ opportunityId }) {
+    const { updateOpportunityStatus } = useChatContext();
+    const [notes, setNotes] = useState('');
+    const [loadingAction, setLoadingAction] = useState(false);
+    const [actionResult, setActionResult] = useState(null);
+
+    const handleAction = async (type) => {
+        if (!opportunityId) return;
+
+        try {
+            setLoadingAction(true);
+            setActionResult(null);
+
+            // If just adding notes, type is null but notes has content
+            // If changing status, type has value (lost/quote)
+
+            await updateOpportunityStatus(opportunityId, type, notes);
+
+            setActionResult({
+                success: true,
+                message: type ? `Estado actualizado a ${type === 'lost' ? 'Perdida' : 'Cotización'}` : 'Nota agregada correctamente'
+            });
+            setNotes(''); // Clear notes after success
+        } catch (error) {
+            setActionResult({ success: false, message: error.message || 'Error al procesar la acción' });
+        } finally {
+            setLoadingAction(false);
+        }
+    };
+
+    return (
+        <div style={{ borderTop: '1px solid #444', paddingTop: '16px', marginTop: '16px', textAlign: 'left' }}>
+            <h6 className="mb-3" style={{ color: '#aaa' }}>Gestión de Oportunidad</h6>
+
+            {/* Status Buttons */}
+            <div className="d-flex gap-2 mb-3">
+                <button
+                    className="btn btn-danger flex-fill"
+                    onClick={() => handleAction('lost')}
+                    disabled={loadingAction}
+                >
+                    <i className="bi bi-x-circle me-1"></i> Pasar a Perdida
+                </button>
+                <button
+                    className="btn btn-info flex-fill text-white"
+                    onClick={() => handleAction('quote')}
+                    disabled={loadingAction}
+                >
+                    <i className="bi bi-file-earmark-text me-1"></i> Cotización
+                </button>
+            </div>
+
+            {/* Notes Section */}
+            <div className="mb-3">
+                <textarea
+                    className="form-control bg-dark text-light border-secondary"
+                    rows="2"
+                    placeholder="Agregar observaciones o notas de seguimiento..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    disabled={loadingAction}
+                    style={{ fontSize: '0.9rem' }}
+                />
+            </div>
+
+            {/* Add Notes Button */}
+            <button
+                className="btn btn-outline-light w-100 mb-3"
+                onClick={() => handleAction(null)} // null type implies just adding notes (or default status)
+                disabled={loadingAction || !notes.trim()}
+            >
+                <i className="bi bi-plus-circle me-1"></i> Agregar Observación
+            </button>
+
+            {/* Feedback Message */}
+            {actionResult && (
+                <div className={`alert ${actionResult.success ? 'alert-success' : 'alert-danger'} py-2 mt-2`} role="alert" style={{ fontSize: '0.85rem' }}>
+                    {actionResult.success ? <i className="bi bi-check-circle me-1"></i> : <i className="bi bi-exclamation-octagon me-1"></i>}
+                    {actionResult.message}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default ExtractedDataPanel;

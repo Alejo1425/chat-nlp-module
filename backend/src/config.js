@@ -30,7 +30,10 @@ module.exports = {
             campana: process.env.CRM_CAMPANA || 'REDES COLOMBIANO',
             codigoDane: process.env.CRM_CODIGO_DANE || '05001',
             usuario: process.env.CRM_USUARIO || 'CHATBOT_NLP',
-            nivelInteres: 'AA'
+            nivelInteres: 'AA',
+            estadoEnProceso: 'PR',
+            estadoPerdida: process.env.CRM_ESTADO_PERDIDA || 'PE', // Placeholder, verify with user
+            estadoCotizacion: process.env.CRM_ESTADO_COTIZACION || 'CT' // Placeholder, verify with user
         }
     }
 };

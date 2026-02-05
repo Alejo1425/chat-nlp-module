@@ -80,4 +80,36 @@ router.get('/inventory/:modelId', async (req, res) => {
     }
 });
 
+// ... (existing code)
+
+/**
+ * POST /api/crm/status
+ * Add follow-up / update status
+ */
+router.post('/status', async (req, res) => {
+    try {
+        const { opportunityId, notes, statusType } = req.body;
+
+        let statusCode = config.crm.defaults.estadoEnProceso;
+        if (statusType === 'lost') statusCode = config.crm.defaults.estadoPerdida;
+        if (statusType === 'quote') statusCode = config.crm.defaults.estadoCotizacion;
+
+        logger.info(`Updating opportunity ${opportunityId} status to ${statusCode} (${statusType})`);
+
+        const result = await crmSync.addFollowUp(opportunityId, notes, statusCode);
+
+        if (result && (result.Exitoso || result.exitoso)) {
+            res.json({ success: true, result });
+        } else {
+            throw new Error(result?.Error?.Mensaje || 'CRM returned unsuccessful status update');
+        }
+    } catch (error) {
+        logger.error('Error updating opportunity status:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to update status'
+        });
+    }
+});
+
 module.exports = router;
