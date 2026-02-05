@@ -51,21 +51,120 @@ function ExtractedDataPanel() {
             <h3>Datos Extraídos (NLP)</h3>
 
             <div className="data-fields">
-                {dataFields.map(({ key, label, icon }) => (
-                    <div key={key} className={`data-field ${extractedData[key] ? 'filled' : ''}`}>
-                        <span className="field-icon">{icon}</span>
-                        <div className="field-content">
-                            <label>{label}</label>
+                {/* Document Type & Number Group */}
+                <div className="data-field filled">
+                    <span className="field-icon">🪪</span>
+                    <div className="field-content">
+                        <label>Documento</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <select
+                                className="field-input"
+                                style={{ width: '60px' }}
+                                value={extractedData.documentType || 'CC'}
+                                onChange={(e) => updateExtractedData(state.activeConversation, { documentType: e.target.value })}
+                            >
+                                <option value="CC">CC</option>
+                                <option value="NIT">NIT</option>
+                                <option value="TI">TI</option>
+                                <option value="CE">CE</option>
+                                <option value="PS">PS</option>
+                            </select>
                             <input
                                 type="text"
                                 className="field-input"
-                                value={extractedData[key] || ''}
-                                onChange={(e) => updateExtractedData(state.activeConversation, { [key]: e.target.value })}
-                                placeholder="—"
+                                value={extractedData.cedula || ''}
+                                onChange={(e) => updateExtractedData(state.activeConversation, { cedula: e.target.value })}
+                                placeholder="Número"
                             />
                         </div>
                     </div>
-                ))}
+                </div>
+
+                {/* Standard Fields */}
+                <div className={`data-field ${extractedData.name ? 'filled' : ''}`}>
+                    <span className="field-icon">👤</span>
+                    <div className="field-content">
+                        <label>Nombre</label>
+                        <input
+                            type="text"
+                            className="field-input"
+                            value={extractedData.name || ''}
+                            onChange={(e) => updateExtractedData(state.activeConversation, { name: e.target.value })}
+                            placeholder="Nombre Completo"
+                        />
+                    </div>
+                </div>
+
+                <div className={`data-field ${extractedData.email ? 'filled' : ''}`}>
+                    <span className="field-icon">📧</span>
+                    <div className="field-content">
+                        <label>Email</label>
+                        <input
+                            type="text"
+                            className="field-input"
+                            value={extractedData.email || ''}
+                            onChange={(e) => updateExtractedData(state.activeConversation, { email: e.target.value })}
+                            placeholder="correo@ejemplo.com"
+                        />
+                    </div>
+                </div>
+
+                <div className={`data-field ${extractedData.phone ? 'filled' : ''}`}>
+                    <span className="field-icon">📱</span>
+                    <div className="field-content">
+                        <label>Teléfono</label>
+                        <input
+                            type="text"
+                            className="field-input"
+                            value={extractedData.phone || ''}
+                            onChange={(e) => updateExtractedData(state.activeConversation, { phone: e.target.value })}
+                            placeholder="Número Celular"
+                        />
+                    </div>
+                </div>
+
+                {/* Product Group */}
+                <div className={`data-field ${extractedData.motoModel ? 'filled' : ''}`}>
+                    <span className="field-icon">🏍️</span>
+                    <div className="field-content">
+                        <label>Moto de Interés</label>
+                        <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+                            <input
+                                type="text"
+                                className="field-input"
+                                value={extractedData.motoModel || ''}
+                                onChange={(e) => updateExtractedData(state.activeConversation, { motoModel: e.target.value })}
+                                placeholder="Modelo (ej: Raider 125)"
+                            />
+                            <input
+                                type="text"
+                                className="field-input"
+                                value={extractedData.brand || ''}
+                                onChange={(e) => updateExtractedData(state.activeConversation, { brand: e.target.value })}
+                                placeholder="Marca (ej: TVS)"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="data-field filled">
+                    <span className="field-icon">📢</span>
+                    <div className="field-content">
+                        <label>Campaña</label>
+                        <select
+                            className="field-input"
+                            value={extractedData.campaign || 'REDES COLOMBIANO'}
+                            onChange={(e) => updateExtractedData(state.activeConversation, { campaign: e.target.value })}
+                        >
+                            <option value="SALA">SALA</option>
+                            <option value="REFERIDO">REFERIDO</option>
+                            <option value="TIKTOK COLOMBIANO">TIKTOK COLOMBIANO</option>
+                            <option value="REDES COLOMBIANO">REDES COLOMBIANO</option>
+                            <option value="TIKTOK EXTRANJERO">TIKTOK EXTRANJERO</option>
+                            <option value="REDES EXTRANJERO">REDES EXTRANJERO</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div className="opportunity-section">

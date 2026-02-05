@@ -24,18 +24,18 @@ async function createOpportunity(data) {
         const opportunity = {
             ID: -1, // Always -1 for creation
             NombreContacto: data.name || data.phone || 'Cliente Chat',
-            TipoDocumento: 'CC', // Default
+            TipoDocumento: data.documentType || 'CC',
             Documento: data.cedula || '',
-            Email: data.email || 'sin_email@example.com', // CRM likely requires valid email format
+            Email: data.email || 'sin_email@example.com',
             Telefono2: data.phone || '',
             CodigoDANE: config.crm.defaults.codigoDane,
             IDOportunidadAuteco: randomId.toString(),
             Origen: config.crm.defaults.origen,
-            Campanna: config.crm.defaults.campana,
+            Campanna: data.campaign || config.crm.defaults.campana,
             Establecimiento: config.crm.defaults.establecimiento,
             Productos: [{
                 Producto: data.motoModel || 'Interés General',
-                Marca: 'TVS' // Defaulting to TVS or generic if unknown, could be improved with extraction
+                Marca: data.brand || 'TVS'
             }],
             Observaciones: `Generado desde Chat NLP. \nNotas: ${data.notes || ''} \nProfesión: ${data.profession || 'No especificada'}`,
             HabeasData: true,
