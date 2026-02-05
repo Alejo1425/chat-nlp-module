@@ -79,7 +79,6 @@ function ExtractedDataPanel() {
                                 #{opportunity.opportunityId || opportunity.id || opportunity.raw?.IdRegistro || opportunity.raw?.IDRegistro || 'N/A'}
                             </div>
                         </div>
-                        {/* Debug Info Section Removed */}
                     </div>
                     {/* Post-Creation Actions */}
                     <PostSaleActions opportunityId={opportunity.opportunityId || opportunity.id || opportunity.raw?.IdRegistro || opportunity.raw?.IDRegistro} />
@@ -229,7 +228,7 @@ function ExtractedDataPanel() {
     );
 }
 
-// Subcomponent for Post-Sale Actions
+// Subcomponent for Post-Sale Actions - REDESIGNED UI
 function PostSaleActions({ opportunityId }) {
     const { updateOpportunityStatus } = useChatContext();
     const [notes, setNotes] = useState('');
@@ -242,17 +241,12 @@ function PostSaleActions({ opportunityId }) {
         try {
             setLoadingAction(true);
             setActionResult(null);
-
-            // If just adding notes, type is null but notes has content
-            // If changing status, type has value (lost/quote)
-
             await updateOpportunityStatus(opportunityId, type, notes);
-
             setActionResult({
                 success: true,
                 message: type ? `Estado actualizado a ${type === 'lost' ? 'Perdida' : 'Cotización'}` : 'Nota agregada correctamente'
             });
-            setNotes(''); // Clear notes after success
+            setNotes('');
         } catch (error) {
             setActionResult({ success: false, message: error.message || 'Error al procesar la acción' });
         } finally {
@@ -260,55 +254,138 @@ function PostSaleActions({ opportunityId }) {
         }
     };
 
+    // Styled button component
+    const ActionButton = ({ onClick, disabled, variant, children }) => {
+        const baseStyle = {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '10px 16px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: '500',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s ease',
+            border: 'none',
+            flex: 1,
+            opacity: disabled ? 0.6 : 1
+        };
+
+        const variants = {
+            danger: {
+                background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+                color: '#fff',
+                boxShadow: '0 2px 8px rgba(220, 53, 69, 0.3)'
+            },
+            info: {
+                background: 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)',
+                color: '#fff',
+                boxShadow: '0 2px 8px rgba(23, 162, 184, 0.3)'
+            },
+            success: {
+                background: 'linear-gradient(135deg, #28a745 0%, #218838 100%)',
+                color: '#fff',
+                boxShadow: '0 2px 8px rgba(40, 167, 69, 0.3)'
+            }
+        };
+
+        return (
+            <button
+                onClick={onClick}
+                disabled={disabled}
+                style={{ ...baseStyle, ...variants[variant] }}
+            >
+                {children}
+            </button>
+        );
+    };
+
     return (
-        <div style={{ borderTop: '1px solid #444', paddingTop: '16px', marginTop: '16px', textAlign: 'left' }}>
-            <h6 className="mb-3" style={{ color: '#aaa' }}>Gestión de Oportunidad</h6>
+        <div style={{
+            marginTop: '20px',
+            padding: '16px',
+            background: 'rgba(0,0,0,0.2)',
+            borderRadius: '10px',
+            textAlign: 'left'
+        }}>
+            <div style={{
+                fontSize: '12px',
+                color: '#888',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                marginBottom: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+            }}>
+                ⚙️ Gestión de Oportunidad
+            </div>
 
             {/* Status Buttons */}
-            <div className="d-flex gap-2 mb-3">
-                <button
-                    className="btn btn-danger flex-fill"
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+                <ActionButton
+                    variant="danger"
                     onClick={() => handleAction('lost')}
                     disabled={loadingAction}
                 >
-                    <i className="bi bi-x-circle me-1"></i> Pasar a Perdida
-                </button>
-                <button
-                    className="btn btn-info flex-fill text-white"
+                    ❌ Perdida
+                </ActionButton>
+                <ActionButton
+                    variant="info"
                     onClick={() => handleAction('quote')}
                     disabled={loadingAction}
                 >
-                    <i className="bi bi-file-earmark-text me-1"></i> Cotización
-                </button>
+                    📄 Cotizar
+                </ActionButton>
             </div>
 
             {/* Notes Section */}
-            <div className="mb-3">
-                <textarea
-                    className="form-control bg-dark text-light border-secondary"
-                    rows="2"
-                    placeholder="Agregar observaciones o notas de seguimiento..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    disabled={loadingAction}
-                    style={{ fontSize: '0.9rem' }}
-                />
-            </div>
+            <textarea
+                placeholder="Escribe una nota de seguimiento..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                disabled={loadingAction}
+                style={{
+                    width: '100%',
+                    padding: '12px',
+                    fontSize: '13px',
+                    background: '#1a1a1a',
+                    color: '#eee',
+                    border: '1px solid #333',
+                    borderRadius: '8px',
+                    resize: 'none',
+                    marginBottom: '10px',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                }}
+                rows={2}
+            />
 
             {/* Add Notes Button */}
-            <button
-                className="btn btn-outline-light w-100 mb-3"
-                onClick={() => handleAction(null)} // null type implies just adding notes (or default status)
+            <ActionButton
+                variant="success"
+                onClick={() => handleAction(null)}
                 disabled={loadingAction || !notes.trim()}
             >
-                <i className="bi bi-plus-circle me-1"></i> Agregar Observación
-            </button>
+                {loadingAction ? '⏳ Procesando...' : '💬 Guardar Nota'}
+            </ActionButton>
 
             {/* Feedback Message */}
             {actionResult && (
-                <div className={`alert ${actionResult.success ? 'alert-success' : 'alert-danger'} py-2 mt-2`} role="alert" style={{ fontSize: '0.85rem' }}>
-                    {actionResult.success ? <i className="bi bi-check-circle me-1"></i> : <i className="bi bi-exclamation-octagon me-1"></i>}
-                    {actionResult.message}
+                <div style={{
+                    marginTop: '12px',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: actionResult.success ? 'rgba(40, 167, 69, 0.15)' : 'rgba(220, 53, 69, 0.15)',
+                    color: actionResult.success ? '#5cb85c' : '#d9534f',
+                    border: `1px solid ${actionResult.success ? 'rgba(40, 167, 69, 0.3)' : 'rgba(220, 53, 69, 0.3)'}`
+                }}>
+                    {actionResult.success ? '✅' : '⚠️'} {actionResult.message}
                 </div>
             )}
         </div>
