@@ -37,10 +37,19 @@ function chatReducer(state, action) {
             return { ...state, messages: action.payload };
 
         case ACTIONS.ADD_MESSAGE:
+            const { message, conversationId } = action.payload;
+
+            // Only add message if it belongs to the active conversation
+            // If conversationId is provided, check it against activeConversation
+            // If activeConversation is null, don't add anything
+            if (conversationId && conversationId !== state.activeConversation) {
+                return state;
+            }
+
             // Check if message already exists
-            const exists = state.messages.some(m => m.id === action.payload.id);
+            const exists = state.messages.some(m => m.id === message.id);
             if (exists) return state;
-            return { ...state, messages: [...state.messages, action.payload] };
+            return { ...state, messages: [...state.messages, message] };
 
         case ACTIONS.UPDATE_EXTRACTED_DATA:
             const currentData = state.extractedData[action.payload.conversationId] || {};
@@ -87,7 +96,13 @@ export function ChatProvider({ children }) {
         });
 
         socket.on('new-message', (data) => {
-            dispatch({ type: ACTIONS.ADD_MESSAGE, payload: data.message });
+            dispatch({
+                type: ACTIONS.ADD_MESSAGE,
+                payload: {
+                    message: data.message,
+                    conversationId: data.conversationId
+                }
+            });
 
             // Update extracted data if present
             if (data.message.extractedData) {
@@ -102,7 +117,13 @@ export function ChatProvider({ children }) {
         });
 
         socket.on('message-sent', (data) => {
-            dispatch({ type: ACTIONS.ADD_MESSAGE, payload: data.message });
+            dispatch({
+                type: ACTIONS.ADD_MESSAGE,
+                payload: {
+                    message: data.message,
+                    conversationId: data.conversationId
+                }
+            });
         });
 
         // Load initial conversations
